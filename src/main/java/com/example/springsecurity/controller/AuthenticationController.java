@@ -1,5 +1,6 @@
 package com.example.springsecurity.controller;
 
+import com.example.springsecurity.dto.JwtAuthenticationResponse;
 import com.example.springsecurity.dto.SignUpRequest;
 import com.example.springsecurity.entities.User;
 import lombok.RequiredArgsConstructor;
@@ -19,5 +20,10 @@ public class AuthenticationController {
     @PostMapping("/signup")
     public ResponseEntity<User> signup(@RequestBody SignUpRequest signUpRequest) {
         return ResponseEntity.ok(authenticationService.signup(signUpRequest));
+    }
+
+    @PostMapping("/signin")
+    public  ResponseEntity<JwtAuthenticationResponse> signin(@RequestBody SignUpRequest signUpRequest){
+        return ResponseEntity.ok(authenticationService.signin(signUpRequest));
     }
 }
