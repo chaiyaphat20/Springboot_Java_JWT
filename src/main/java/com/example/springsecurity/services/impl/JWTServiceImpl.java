@@ -18,10 +18,6 @@ import java.util.function.Function;
 
 @Service
 public class JWTServiceImpl implements JWTService {
-    @Override
-    public String extractUserName(String token) {
-        return "";
-    }
 
     public String generateRefreshToken(Map<String, Objects> extractClaim, UserDetails userDetails) {
         return Jwts.builder().setClaims(extractClaim).setSubject(userDetails.getUsername())
@@ -32,7 +28,8 @@ public class JWTServiceImpl implements JWTService {
     }
 
     public String generateToken(UserDetails userDetails) {
-        return Jwts.builder().setSubject(userDetails.getUsername())
+        return Jwts.builder()
+                .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis()+1000*60*24))
                 .signWith(getSigninkey(), SignatureAlgorithm.HS256)
@@ -41,6 +38,7 @@ public class JWTServiceImpl implements JWTService {
     }
 
     public String extractUsername(String token) {
+        System.out.println("token1 " + token);
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -51,7 +49,18 @@ public class JWTServiceImpl implements JWTService {
 
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder().setSigningKey(getSigninkey()).build().parseClaimsJws(token).getBody();
+        try {
+            return Jwts
+                    .parserBuilder()
+                    .setSigningKey(getSigninkey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (Exception e) {
+            System.out.println("Error parsing token: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @Value("${jwt.secret}") //มาจาก applocation.setting
