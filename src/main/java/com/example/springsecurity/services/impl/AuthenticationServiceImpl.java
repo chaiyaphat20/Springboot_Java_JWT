@@ -49,15 +49,24 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 
     public JwtAuthenticationResponse signin(SigninRequest signinRequest) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signinRequest.getEmail(), signinRequest.getPassword()));
+        // ตรวจสอบ username และ password กับระบบ authentication ของ Spring Security
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(signinRequest.getEmail(), signinRequest.getPassword())
+        );
 
-        var user = userRepository.findByEmail(signinRequest.getEmail()).orElseThrow(()-> new IllegalArgumentException("Invalid Email or Password"));
+        // ถ้าผ่านการตรวจสอบ จะดึงข้อมูลผู้ใช้ออกมา
+        var user = userRepository.findByEmail(signinRequest.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Email or Password"));
+
+        // สร้าง token
         var jwt = jwtService.generateToken(user);
-        var refreshToken = jwtService.generateRefreshToken(new HashMap<>(),user);
+        var refreshToken = jwtService.generateRefreshToken(new HashMap<>(), user);
+
+        // สร้างการตอบกลับ
         JwtAuthenticationResponse jwtAuthenticationResponse = new JwtAuthenticationResponse();
         jwtAuthenticationResponse.setToken(jwt);
         jwtAuthenticationResponse.setRefreshToken(refreshToken);
-        return  jwtAuthenticationResponse;
+        return jwtAuthenticationResponse;
     }
 
    public JwtAuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
